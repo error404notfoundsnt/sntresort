@@ -9,6 +9,7 @@
     height: 100vh; width: 100vw;
     font-family: Arial, sans-serif;
     background: #000;
+    user-select: none;
   }
   #bottomText {
     position: fixed;
@@ -46,10 +47,12 @@
     textCanvas.width = W;
     textCanvas.height = H;
   }
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', () => {
+    resize();
+    createTextParticles();
+  });
   resize();
 
-  // Сердечко-прозрачное с лёгким розовым оттенком и 3D эффектом
   class HeartParticle {
     constructor() {
       this.reset();
@@ -58,19 +61,19 @@
       this.x = Math.random() * W;
       this.y = Math.random() * H;
       this.size = 8 + Math.random() * 7;
-      // Двигаются бодрее, чуть больше вариации
       this.speedX = (Math.random() - 0.5) * 0.6 + 0.3;
       this.speedY = (Math.random() - 0.5) * 0.6 + 0.3;
       this.angle = Math.random() * Math.PI * 2;
       this.angleSpeed = (Math.random() - 0.5) * 0.02;
-      this.alpha = 0.05 + Math.random() * 0.1; // прозрачность ниже
+      this.alpha = 0.05 + Math.random() * 0.1;
+      this.vx = 0; // velocity X для отталкивания
+      this.vy = 0; // velocity Y
     }
     draw(ctx) {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle);
 
-      // Градиент — прозрачный, чуть розоватый, для эффекта стекла
       const grad = ctx.createRadialGradient(0, 0, this.size * 0.1, 0, 0, this.size);
       grad.addColorStop(0, `rgba(255, 182, 193, ${this.alpha + 0.2})`);
       grad.addColorStop(0.6, `rgba(255, 182, 193, ${this.alpha})`);
@@ -84,7 +87,6 @@
       ctx.bezierCurveTo(-this.size, 0, -this.size / 2, -this.size, 0, -this.size / 2);
       ctx.fill();
 
-      // Тонкий светящийся контур
       ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.3})`;
       ctx.lineWidth = 0.7;
       ctx.shadowColor = `rgba(255,182,193,${this.alpha * 0.6})`;
@@ -94,14 +96,36 @@
       ctx.restore();
     }
     update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
+      // Плавное замедление скорости отталкивания (демпфинг)
+      this.vx *= 0.95;
+      this.vy *= 0.95;
+
+      // Добавляем к позиции текущую скорость
+      this.x += this.speedX + this.vx;
+      this.y += this.speedY + this.vy;
       this.angle += this.angleSpeed;
 
+      // Зацикливание по краям
       if (this.x < -20) this.x = W + 20;
       if (this.x > W + 20) this.x = -20;
       if (this.y < -20) this.y = H + 20;
       if (this.y > H + 20) this.y = -20;
+    }
+    repelFrom(px, py) {
+      const dx = this.x - px;
+      const dy = this.y - py;
+      const distSq = dx * dx + dy * dy;
+      const dist = Math.sqrt(distSq);
+
+      if (dist < 150) { // радиус отталкивания
+        const force = (150 - dist) / 150 * 5; // сила отталкивания зависит от расстояния
+        // нормализуем вектор
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        this.vx += nx * force;
+        this.vy += ny * force;
+      }
     }
   }
 
@@ -111,11 +135,11 @@
     hearts.push(new HeartParticle());
   }
 
-  // Светлячки текста — мелкие, куча, почти на месте, медленное мерцание
+  // Текстовые светлячки
   const text = 'с тебя чипсеки';
   let fontSize = 110;
   const textParticles = [];
-  const textParticleSize = 1.5; // меньше размер
+  const textParticleSize = 1.5;
 
   const offscreenCanvas = document.createElement('canvas');
   const offscreenCtx = offscreenCanvas.getContext('2d');
@@ -123,7 +147,10 @@
   function createTextParticles() {
     offscreenCanvas.width = W;
     offscreenCanvas.height = H;
-    offscreenCtx.clearRect(0, 0, W, H);
+    offscreenCtx.clearRect
+
+
+, 0, W, H);
     offscreenCtx.font = `bold ${fontSize}px Arial`;
     offscreenCtx.textBaseline = 'middle';
     offscreenCtx.textAlign = 'center';
@@ -133,14 +160,11 @@
     const imageData = offscreenCtx.getImageData(0, 0, W, H);
     textParticles.length = 0;
 
-    // Интервал меньше — больше частиц
     for (let y = 0; y < H; y += 3) {
       for (let x = 0; x < W; x += 3) {
         const idx = (y * W + x) * 4;
         if (imageData.data[idx + 3] > 128) {
-
-
-textParticles.push({
+          textParticles.push({
             baseX: x,
             baseY: y,
             x: x + (Math.random() - 0.5) * 0.5,
@@ -159,14 +183,12 @@ textParticles.push({
 
   function drawTextParticles(ctx, time) {
     ctx.clearRect(0, 0, W, H);
-    const flickerSpeed = 0.003; // медленное мерцание ещё плавнее
-    const moveAmplitude = 0.8; // очень маленькое движение
+    const flickerSpeed = 0.003;
+    const moveAmplitude = 0.8;
     const moveFrequency = 0.008;
 
     textParticles.forEach(p => {
-      // Легкое колебание - мерцание
       const brightness = 0.5 + 0.5 * Math.sin(time * flickerSpeed + p.flickerOffset);
-      // Еле заметные волны по Y
       const waveY = Math.sin(time * moveFrequency + p.wavePhase) * 2;
 
       p.x = p.baseX + Math.sin(time * moveFrequency + p.movePhase) * moveAmplitude;
@@ -186,10 +208,18 @@ textParticles.push({
 
   let time = 0;
 
+  // Обработчик клика — отталкиваем сердечки от точки клика
+  bgCanvas.addEventListener('click', (e) => {
+    const rect = bgCanvas.getBoundingClientRect();
+    const clickX = e.clientX - rect.left;
+    const clickY = e.clientY - rect.top;
+
+    hearts.forEach(h => h.repelFrom(clickX, clickY));
+  });
+
   function animate() {
     time++;
 
-    // Чёрный фон без полупрозрачности чтоб не мешать
     bgCtx.fillStyle = '#000';
     bgCtx.fillRect(0, 0, W, H);
 
@@ -204,11 +234,6 @@ textParticles.push({
   }
 
   animate();
-
-  window.addEventListener('resize', () => {
-    resize();
-    createTextParticles();
-  });
 </script>
 </body>
 </html>
