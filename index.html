@@ -58,11 +58,12 @@
       this.x = Math.random() * W;
       this.y = Math.random() * H;
       this.size = 8 + Math.random() * 7;
-      this.speedX = (Math.random() - 0.5) * 0.3 + 0.1; // чуть быстрее
-      this.speedY = (Math.random() - 0.5) * 0.3 + 0.1;
+      // Двигаются бодрее, чуть больше вариации
+      this.speedX = (Math.random() - 0.5) * 0.6 + 0.3;
+      this.speedY = (Math.random() - 0.5) * 0.6 + 0.3;
       this.angle = Math.random() * Math.PI * 2;
-      this.angleSpeed = (Math.random() - 0.5) * 0.01;
-      this.alpha = 0.05 + Math.random() * 0.12; // прозрачность ниже
+      this.angleSpeed = (Math.random() - 0.5) * 0.02;
+      this.alpha = 0.05 + Math.random() * 0.1; // прозрачность ниже
     }
     draw(ctx) {
       ctx.save();
@@ -71,7 +72,7 @@
 
       // Градиент — прозрачный, чуть розоватый, для эффекта стекла
       const grad = ctx.createRadialGradient(0, 0, this.size * 0.1, 0, 0, this.size);
-      grad.addColorStop(0, `rgba(255, 182, 193, ${this.alpha + 0.15})`);
+      grad.addColorStop(0, `rgba(255, 182, 193, ${this.alpha + 0.2})`);
       grad.addColorStop(0.6, `rgba(255, 182, 193, ${this.alpha})`);
       grad.addColorStop(1, `rgba(255, 182, 193, 0)`);
 
@@ -86,6 +87,8 @@
       // Тонкий светящийся контур
       ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.3})`;
       ctx.lineWidth = 0.7;
+      ctx.shadowColor = `rgba(255,182,193,${this.alpha * 0.6})`;
+      ctx.shadowBlur = 8;
       ctx.stroke();
 
       ctx.restore();
@@ -135,17 +138,18 @@
       for (let x = 0; x < W; x += 3) {
         const idx = (y * W + x) * 4;
         if (imageData.data[idx + 3] > 128) {
-          textParticles.push({
+
+
+textParticles.push({
             baseX: x,
             baseY: y,
-            x: x + (Math.random() - 0.5) * 1,
-
-
-y: y + (Math.random() - 0.5) * 1,
+            x: x + (Math.random() - 0.5) * 0.5,
+            y: y + (Math.random() - 0.5) * 0.5,
             size: textParticleSize,
             flickerOffset: Math.random() * 2000,
             alpha: 0.4 + Math.random() * 0.3,
             movePhase: Math.random() * Math.PI * 2,
+            wavePhase: Math.random() * Math.PI * 2,
           });
         }
       }
@@ -155,16 +159,19 @@ y: y + (Math.random() - 0.5) * 1,
 
   function drawTextParticles(ctx, time) {
     ctx.clearRect(0, 0, W, H);
-    const flickerSpeed = 0.005; // медленное мерцание
+    const flickerSpeed = 0.003; // медленное мерцание ещё плавнее
     const moveAmplitude = 0.8; // очень маленькое движение
-    const moveFrequency = 0.01;
+    const moveFrequency = 0.008;
 
     textParticles.forEach(p => {
-      // Очень лёгкое колебание, почти на месте
-      p.x = p.baseX + Math.sin(time * moveFrequency + p.movePhase) * moveAmplitude;
-      p.y = p.baseY + Math.cos(time * moveFrequency + p.movePhase) * moveAmplitude;
-
+      // Легкое колебание - мерцание
       const brightness = 0.5 + 0.5 * Math.sin(time * flickerSpeed + p.flickerOffset);
+      // Еле заметные волны по Y
+      const waveY = Math.sin(time * moveFrequency + p.wavePhase) * 2;
+
+      p.x = p.baseX + Math.sin(time * moveFrequency + p.movePhase) * moveAmplitude;
+      p.y = p.baseY + waveY;
+
       ctx.fillStyle = `rgba(255,255,255,${brightness * p.alpha})`;
 
       ctx.beginPath();
@@ -182,8 +189,8 @@ y: y + (Math.random() - 0.5) * 1,
   function animate() {
     time++;
 
-    // Чёрный фон с легкой прозрачностью, чтобы не моргал слишком резко
-    bgCtx.fillStyle = 'rgba(0,0,0,0.1)';
+    // Чёрный фон без полупрозрачности чтоб не мешать
+    bgCtx.fillStyle = '#000';
     bgCtx.fillRect(0, 0, W, H);
 
     hearts.forEach(h => {
