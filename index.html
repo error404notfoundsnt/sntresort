@@ -58,19 +58,22 @@
         this.speedY = (Math.random() - 0.5) * 0.2;
         this.angle = Math.random() * Math.PI * 2;
         this.angleSpeed = (Math.random() - 0.5) * 0.02;
+        this.offset = Math.random() * 1000;
       }
-      draw(ctx) {
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(this.angle);
-        ctx.fillStyle = `rgba(255,105,180,${this.alpha})`;
-        ctx.beginPath();
-        ctx.moveTo(0, -this.size/2);
-        ctx.bezierCurveTo(this.size/2, -this.size, this.size, 0, 0, this.size);
-        ctx.bezierCurveTo(-this.size, 0, -this.size/2, -this.size, 0, -this.size/2);
-        ctx.fill();
-        ctx.restore();
-      }
+      raw(ctx) {
+  this.brightness = 0.7 + 0.3 * Math.sin(Date.now() * 0.005 + this.offset);
+  ctx.fillStyle = rgba(255, 255, 255, ${this.brightness});
+  ctx.shadowColor = "white";
+  ctx.shadowBlur = 8;
+  
+  ctx.beginPath();
+  ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+  ctx.fill();
+
+  // убираем тени чтобы не влияли на другие отрисовки
+  ctx.shadowBlur = 0;
+}
+      
       update() {
         this.x += this.speedX;
         this.y += this.speedY;
@@ -96,7 +99,8 @@
     offscreenCanvas.height = H;
 
     function createTextParticles() {
-      offscreenCtx.clearRect(0, 0, W, H);
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      ctx.fillRect(0, 0, W, H);
       offscreenCtx.font = fontSize + 'px Arial';
       offscreenCtx.fillStyle = 'white';
       offscreenCtx.textBaseline = 'middle';
