@@ -136,11 +136,7 @@ offscreenCtx.fillText(text, W / 2, H / 2);
 const imageData = offscreenCtx.getImageData(0, 0, W, H);
 textParticles.length = 0;
 for (let y = 0; y < H; y += 6) {
-for (let x
-Выбрать сообщение
-Sofa
-16:26
-= 0; x < W; x += 6) {
+for (let x = 0; x < W; x += 6) {
 const idx = (y * W + x) * 4;
 if (imageData.data[idx + 3] > 128) {
 textParticles.push({
