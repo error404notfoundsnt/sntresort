@@ -62,7 +62,7 @@
       }
       raw(ctx) {
   this.brightness = 0.7 + 0.3 * Math.sin(Date.now() * 0.005 + this.offset);
-  ctx.fillStyle = rgba(255, 255, 255, ${this.brightness});
+  ctx.fillStyle = 'rgba(255, 255, 255, ${this.brightness})';
   ctx.shadowColor = "white";
   ctx.shadowBlur = 8;
   
