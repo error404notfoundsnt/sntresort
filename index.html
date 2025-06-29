@@ -98,35 +98,38 @@
     offscreenCanvas.width = W;
     offscreenCanvas.height = H;
 
-    function createTextParticles() {
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
-      ctx.fillRect(0, 0, W, H);
-      offscreenCtx.font = fontSize + 'px Arial';
-      offscreenCtx.fillStyle = 'white';
-      offscreenCtx.textBaseline = 'middle';
-      offscreenCtx.textAlign = 'center';
-      offscreenCtx.fillText(text, W/2, H/2);
+    function createTextParticles(ctx) {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+  ctx.fillRect(0, 0, W, H);
+  offscreenCtx.font = fontSize + 'px Arial';
+  offscreenCtx.fillStyle = 'white';
+  offscreenCtx.textBaseline = 'middle';
+  offscreenCtx.textAlign = 'center';
+  offscreenCtx.fillText(text, W/2, H/2);
 
-      const imageData = offscreenCtx.getImageData(0, 0, W, H);
-      textParticles.length = 0;
-      for(let y=0; y<H; y+=6) {
-        for(let x=0; x<W; x+=6) {
-          const index = (y * W + x) * 4;
-          if(imageData.data[index + 3] > 128) {
-            textParticles.push({
-              x: x,
-              y: y,
-              size: textParticleSize,
-              baseX: x,
-              baseY: y,
-              flicker: Math.random() * 1000,
-              alpha: 0.7 + Math.random() * 0.3
-            });
-          }
-        }
+  const imageData = offscreenCtx.getImageData(0, 0, W, H);
+  textParticles.length = 0;
+  for(let y = 0; y < H; y += 6) {
+    for(let x = 0; x < W; x += 6) {
+      const index = (y * W + x) * 4;
+      if(imageData.data[index + 3] > 128) {
+        textParticles.push({
+          x: x,
+          y: y,
+          size: textParticleSize,
+          baseX: x,
+          baseY: y,
+          flicker: Math.random() * 1000,
+          alpha: 0.7 + Math.random() * 0.3
+        });
       }
     }
-    createTextParticles();
+  }
+}
+
+// Когда вызываешь — обязательно пихай ctx:
+
+createTextParticles(ctx);
 
     function drawTextParticles() {
       textCtx.clearRect(0, 0, W, H);
