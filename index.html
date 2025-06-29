@@ -96,7 +96,7 @@
     }
 
     // 🌟 Частицы текста
-    const text = 'с тебя чипсеки';
+    const text = `с тебя чипсеки`;
     const fontSize = 80;
     const textParticleSize = 2;
     const textParticles = [];
@@ -107,9 +107,9 @@
       offscreenCanvas.height = H;
       const offscreenCtx = offscreenCanvas.getContext('2d');
       offscreenCtx.font = fontSize + 'px Arial';
-      offscreenCtx.fillStyle = 'white';
-      offscreenCtx.textAlign = 'center';
-      offscreenCtx.textBaseline = 'middle';
+      offscreenCtx.fillStyle = `white`;
+      offscreenCtx.textAlign = `center`;
+      offscreenCtx.textBaseline = `middle`;
       offscreenCtx.fillText(text, W/2, H/2);
 
       const imageData = offscreenCtx.getImageData(0, 0, W, H).data;
@@ -132,7 +132,7 @@
     }
 
     function animate() {
-      bgCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+      bgCtx.fillStyle = `rgba(0, 0, 0, 0.1)`;
       bgCtx.fillRect(0, 0, W, H);
       for(let heart of hearts) {
         heart.update();
@@ -143,8 +143,7 @@
       const time = Date.now() * 0.002;
       for (let p of textParticles) {
         let flicker = 0.7 + 0.3 * Math.sin(time + p.offset);
-        textCtx.fillStyle = rgba(255, 255, 255, ${flicker});
-        const dx = 0.5 * Math.sin(time + p.offset);
+        textCtx.fillStyle = `rgba(255, 255, 255, ${flicker});const dx = 0.5 * Math.sin(time + p.offset)`;
         const dy = 0.5 * Math.cos(time + p.offset);
         textCtx.beginPath();
         textCtx.arc(p.baseX + dx, p.baseY + dy, p.size, 0, Math.PI * 2);
