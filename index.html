@@ -5,183 +5,168 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>с тебя чипсеки</title>
 <style>
-  body, html {
-    margin: 0; padding: 0; overflow: hidden;
-    background: #000;
-    height: 100vh;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    color: white;
+  html, body {
+    margin:0; padding:0; overflow:hidden; background: #000;
+    height: 100vh; width: 100vw; font-family: Arial, sans-serif;
+  }
+  #bottomText {
+    position: fixed;
+    right: 10px;
+    bottom: 5px;
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    user-select: none;
   }
   canvas {
     display: block;
-    position: fixed;
-    top: 0; left: 0;
-    width: 100vw;
-    height: 100vh;
+    position: absolute;
+    top:0; left:0;
     z-index: 0;
-  }
-  #footerText {
-    position: fixed;
-    bottom: 10px;
-    right: 10px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.4);
-    z-index: 10;
-    user-select: none;
   }
 </style>
 </head>
 <body>
-<canvas id="canvas"></canvas>
-<div id="footerText">Иисус тут не поможет</div>
+
+<canvas id="background"></canvas>
+<canvas id="textCanvas"></canvas>
+
+<div id="bottomText">Иисус тут не поможет</div>
 
 <script>
-(() => {
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  let W, H;
+const bgCanvas = document.getElementById('background');
+const bgCtx = bgCanvas.getContext('2d');
 
-  function resize() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    canvas.width = W;
-    canvas.height = H;
+const textCanvas = document.getElementById('textCanvas');
+const textCtx = textCanvas.getContext('2d');
+
+let W, H;
+function resize() {
+  W = window.innerWidth;
+  H = window.innerHeight;
+  bgCanvas.width = W;
+  bgCanvas.height = H;
+  textCanvas.width = W;
+  textCanvas.height = H;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ========== Розовые сердечки (фон) ==========
+
+class HeartParticle {
+  constructor() {
+    this.x = Math.random() * W;
+    this.y = Math.random() * H;
+    this.size = 8 + Math.random() * 8;
+    this.alpha = 0.2 + Math.random() * 0.3;
+    this.speedX = (Math.random() - 0.5) * 0.2;
+    this.speedY = (Math.random() - 0.5) * 0.2;
+    this.angle = Math.random() * Math.PI * 2;
+    this.angleSpeed = (Math.random() - 0.5) * 0.02;
   }
-  window.addEventListener('resize', resize);
-  resize();
-
-  // ------------------
-  // Полупрозрачные розовые сердечки — фон
-  class HeartParticle {
-    constructor() {
-      this.reset();
-    }
-    reset() {
-      this.x = Math.random() * W;
-      this.y = Math.random() * H;
-      this.size = 8 + Math.random() * 12;
-      this.alpha = 0.1 + Math.random() * 0.15;
-      this.speedX = (Math.random() - 0.5) * 0.3;
-      this.speedY = (Math.random() - 0.5) * 0.3;
-      this.angle = Math.random() * Math.PI * 2;
-      this.angleSpeed = (Math.random() - 0.5) * 0.01;
-      this.color = rgba(255, 182, 193, ${this.alpha}); // lightpink with alpha
-    }
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
-      this.angle += this.angleSpeed;
-      if (this.x < -20) this.x = W + 20;
-      else if (this.x > W + 20) this.x = -20;
-      if (this.y < -20) this.y = H + 20;
-      else if (this.y > H + 20) this.y = -20;
-    }
-    draw(ctx) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle);
-      ctx.fillStyle = this.color;
-      ctx.beginPath();
-      // Рисуем сердечко через две окружности и треугольник
-      let size = this.size / 2;
-      ctx.moveTo(0, size);
-      ctx.bezierCurveTo(size, size, size, 0, 0, -size / 2);
-      ctx.bezierCurveTo(-size, 0, -size, size, 0, size);
-      ctx.fill();
-      ctx.restore();
-    }
+  draw(ctx) {
+    ctx.save();
+    ctx.translate(this.x, this.y);
+    ctx.rotate(this.angle);
+    // Рисуем сердечко
+    ctx.fillStyle = rgba(255,105,180,${this.alpha}); // нежно-розовый
+    ctx.beginPath();
+    ctx.moveTo(0, -this.size/2);
+    ctx.bezierCurveTo(this.size/2, -this.size, this.size, 0, 0, this.size);
+    ctx.bezierCurveTo(-this.size, 0, -this.size/2, -this.size, 0, -this.size/2);
+    ctx.fill();
+    ctx.restore();
   }
+  update() {
+    this.x += this.speedX;
+    this.y += this.speedY;
+    this.angle += this.angleSpeed;
 
-  // Создаём фоновые сердечки
-  const hearts = [];
-  for (let i = 0; i < 80; i++) {
-    hearts.push(new HeartParticle());
+    if(this.x < -20) this.x = W + 20;
+    if(this.x > W + 20) this.x = -20;
+    if(this.y < -20) this.y = H + 20;
+    if(this.y > H + 20) this.y = -20;
   }
+}
 
-  // ------------------
-  // Частицы для текста (светлячки)
-  // Настроим текст "с тебя чипсеки"
-  const text = 'с тебя чипсеки';
-  // Создаем canvas для рендеринга текста и получения позиций частиц
-  const textCanvas = document.createElement('canvas');
-  const textCtx = textCanvas.getContext('2d');
-  let particles = [];
-  let textWidth, textHeight;
+const hearts = [];
+for(let i=0; i<80; i++) hearts.push(new HeartParticle());
 
-  function createTextParticles() {
-    // Размеры для offscreen canvas
-    textCanvas.width = W;
-    textCanvas.height = H;
-    const fontSize = Math.min(W / (text.length * 0.7), 100);
-    textCtx.clearRect(0, 0, textCanvas.width, textCanvas.height);
-    textCtx.font = bold ${fontSize}px 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    textCtx.textBaseline = 'middle';
-    textCtx.textAlign = 'center';
-    textCtx.fillStyle = 'white';
-    textCtx.fillText(text, W / 2, H / 2);
+// ========== Текст из неоновых частиц ==========
 
-    const imageData = textCtx.getImageData(0, 0, W, H);
-    const data = imageData.data;
+const text = "с тебя чипсеки";
+const fontSize = 90;
+const textParticles = [];
+const textParticleSize = 3;
 
-    particles = [];
-    // Идем по пикселям с шагом 6 (чем меньше — тем больше частиц)
-    const step = 6;
-    for (let y = 0; y < H; y += step) {
-      for (let x = 0; x < W; x += step) {
-        const index = (y * W + x) * 4;
-        if (data[index + 3] > 128) { // Альфа > 128 — пиксель непрозрачный
-          particles.push({
-            x: x + (Math.random() - 0.5) * 2,
-            y: y + (Math.random() - 0.5) * 2,
-            baseX: x,
-            baseY: y,
-            size: 1.5 + Math.random(),
-            alpha: 0.6 + Math.random() * 0.4,
-            phase: Math.random() * Math.PI * 2
-          });
-        }
+// Чтобы получить координаты частиц, рисуем текст на скрытом canvas
+const offscreenCanvas = document.createElement('canvas');
+const offscreenCtx = offscreenCanvas.getContext('2d');
+offscreenCanvas.width = W;
+offscreenCanvas.height = H;
+
+function createTextParticles() {
+  offscreenCtx.clearRect(0, 0, W, H);
+  offscreenCtx.font = ${fontSize}px Arial, sans-serif;
+  offscreenCtx.fillStyle = 'white';
+  offscreenCtx.textBaseline = 'middle';
+  offscreenCtx.textAlign = 'center';
+  offscreenCtx.fillText(text, W/2, H/2);
+
+  const imageData = offscreenCtx.getImageData(0, 0, W, H);
+  textParticles.length = 0;
+  for(let y=0; y<H; y+=6) {
+    for(let x=0; x<W; x+=6) {
+      const index = (y * W + x) * 4;
+      if(imageData.data[index + 3] > 128) { // если пиксель непрозрачный
+        textParticles.push({
+          x: x + (Math.random() - 0.5) * 2,
+          y: y + (Math.random() - 0.5) * 2,
+          baseX: x,
+          baseY: y,
+          size: textParticleSize,
+          alpha: 0.7 + Math.random() * 0.3,
+          flicker: Math.random() * 1000
+        });
       }
     }
   }
+}
 createTextParticles();
 
-  // ------------------
-  // Анимация
-  function animate() {
-    ctx.clearRect(0, 0, W, H);
+function drawTextParticles() {
+  textCtx.clearRect(0, 0, W, H);
+  textCtx.fillStyle = '#ff3aff'; // неоновый розовый
+  textCtx.shadowColor = '#ff3aff';
+  textCtx.shadowBlur = 10;
 
-    // Рисуем сердечки-фон
-    hearts.forEach(h => {
-      h.update();
-      h.draw(ctx);
-    });
+  const time = Date.now();
+  for(let p of textParticles) {
+    // Добавим легкое мерцание и колебания почти на месте
+    const flicker = 0.3 * Math.sin((time + p.flicker) / 200);
+    const offsetX = 1 * Math.sin((time + p.flicker) / 500);
+    const offsetY = 1 * Math.cos((time + p.flicker) / 500);
 
-    // Рисуем текстовые частицы (светлячки)
-    const time = Date.now() * 0.002;
-    particles.forEach(p => {
-      // Слегка двигаются на месте (плавное мерцание)
-      p.alpha += Math.sin(time + p.phase) * 0.02;
-      if (p.alpha > 1) p.alpha = 1;
-      if (p.alpha < 0.4) p.alpha = 0.4;
-
-      // Плавно колеблются по x,y в районе base координат (±1.2 px)
-      const dx = Math.sin(time + p.phase) * 1.2;
-      const dy = Math.cos(time + p.phase) * 1.2;
-
-      ctx.beginPath();
-      ctx.fillStyle = rgba(0, 255, 255, ${p.alpha.toFixed(2)}); // неоновый голубой светлячок
-      ctx.shadowColor = 'rgba(0, 255, 255, 0.7)';
-      ctx.shadowBlur = 6;
-      ctx.arc(p.baseX + dx, p.baseY + dy, p.size, 0, Math.PI * 2);
-      ctx.fill();
-    });
-
-    requestAnimationFrame(animate);
+    textCtx.globalAlpha = p.alpha + flicker;
+    textCtx.beginPath();
+    textCtx.arc(p.x + offsetX, p.y + offsetY, p.size, 0, Math.PI*2);
+    textCtx.fill();
   }
+  textCtx.globalAlpha = 1;
+}
 
-  animate();
-
-})();
+// ========== Анимация ==========
+function animate() {
+  bgCtx.clearRect(0, 0, W, H);
+  for(let heart of hearts) {
+    heart.update();
+    heart.draw(bgCtx);
+  }
+  drawTextParticles();
+  requestAnimationFrame(animate);
+}
+animate();
 </script>
+
 </body>
 </html>
