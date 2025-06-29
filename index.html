@@ -76,21 +76,21 @@
       ctx.translate(this.x, this.y);
       ctx.rotate(this.angle);
       // стеклянный эффект с градиентом
-      const grad = ctx.createRadialGradient(0, 0, this.size * 0.1, 0, 0, this.size);
-      grad.addColorStop(0, `rgba(255, 105, 180, ${this.alpha + 0.3})`);
+      const grad = ctx.createRadialGradient(0, 0, this.size * 0.4, 0, 0, this.size);
+      grad.addColorStop(0, `rgba(255, 105, 180, ${this.alpha + 0.8})`);
       grad.addColorStop(0.5, `rgba(255, 182, 193, ${this.alpha})`);
       grad.addColorStop(1, `rgba(255, 105, 180, 0)`);
       ctx.fillStyle = grad;
 
       ctx.beginPath();
       ctx.moveTo(0, -this.size / 4);
-      ctx.bezierCurveTo(this.size / 4, -this.size, this.size, 0, 0, this.size);
-      ctx.bezierCurveTo(-this.size, 0, -this.size / 4, -this.size, 0, -this.size / 4);
+      ctx.bezierCurveTo(this.size / 1, -this.size, this.size, 0, 0, this.size);
+      ctx.bezierCurveTo(-this.size, 0, -this.size / 1, -this.size, 0, -this.size / 1);
       ctx.fill();
 
       // легкий светящийся контур — подсветка
-      ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.9})`;
-      ctx.lineWidth = 1;
+      ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.01})`;
+      ctx.lineWidth = 0.5;
       ctx.stroke();
       ctx.restore();
     }
@@ -107,14 +107,14 @@
 
   // Генерация и отрисовка сердечек
   const hearts = [];
-  const HEART_COUNT = 120;
+  const HEART_COUNT = 70;
   for (let i = 0; i < HEART_COUNT; i++) {
     hearts.push(new HeartParticle());
   }
 
   // Частицы текста — светлячки
   const text = 'с тебя чипсеки';
-  let fontSize = 140;
+  let fontSize = 120;
   const textParticles = [];
   const textParticleSize = 4;
   let time = 0;
@@ -171,17 +171,17 @@
       p.y = p.baseY + wave + (Math.random() - 0.5) * 0.5; // волны + микродвижение Y
 
       // Яркость как светлячок (мерцание)
-      const brightness = 0.5 + 0.5 * Math.sin(time * 0.01 + p.flickerOffset);
+      const brightness = 0.5 + 0.5 * Math.sin(time * 0.1 + p.flickerOffset);
       ctx.fillStyle = `rgba(255,255,255,${brightness})`;
 
       // Рисуем частичку (круг)
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 1);
       ctx.fill();
 
       // След
-      ctx.shadowColor = `rgba(255,182,193,${brightness * 0.6})`;
-      ctx.shadowBlur = 20;
+      ctx.shadowColor = `rgba(255,182,193,${brightness * 0.3})`;
+      ctx.shadowBlur = 5;
       ctx.fill();
     });
   }
