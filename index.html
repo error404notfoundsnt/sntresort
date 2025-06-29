@@ -131,7 +131,10 @@ function drawText(){
 
 // Анимация фона и всех
 bgC.addEventListener('click',e=>{
-  const rx=e.clientX, ry=entY;
+  const rx=e.clientX, ry=e
+
+
+ntY;
   hearts.forEach(h=>h.repel(rx,ry));
 });
 
@@ -145,4 +148,4 @@ function loop(){
 loop();
 </script>
 </body>
-</html>.clie
+</html>
