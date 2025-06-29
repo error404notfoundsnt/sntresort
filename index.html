@@ -4,233 +4,145 @@
 <meta charset="UTF-8" />
 <title>с тебя чипсеки</title>
 <style>
-  html, body {
-    margin: 0; padding: 0; overflow: hidden;
-    height: 100vh; width: 100vw;
-    font-family: Arial, sans-serif;
-    background: #000;
-    user-select: none;
-  }
-  #bottomText {
-    position: fixed;
-    right: 10px;
-    bottom: 5px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-    user-select: none;
-    z-index: 10;
-  }
-  canvas {
-    display: block;
-    position: absolute;
-    top: 0; left: 0;
-  }
+  html, body { margin:0; padding:0; overflow:hidden; width:100vw; height:100vh; background:#000; user-select:none; }
+  #bottomText { position:fixed; right:10px; bottom:5px; font-size:12px; color:rgba(255,255,255,0.5); z-index:10; }
+  canvas { position:absolute; top:0; left:0; display:block; }
 </style>
 </head>
 <body>
 <canvas id="background"></canvas>
 <canvas id="textCanvas"></canvas>
 <div id="bottomText">Иисус тут не поможет</div>
-
 <script>
-  const bgCanvas = document.getElementById('background');
-  const bgCtx = bgCanvas.getContext('2d');
-  const textCanvas = document.getElementById('textCanvas');
-  const textCtx = textCanvas.getContext('2d');
+const bgC = document.getElementById('background'), bgCtx = bgC.getContext('2d');
+const txC = document.getElementById('textCanvas'), txCtx = txC.getContext('2d');
+let W, H, hearts = [], textParticles = [], time=0;
+const text = 'с тебя чипсеки', fontSize=110;
 
-  let W, H;
-  function resize() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    bgCanvas.width = W;
-    bgCanvas.height = H;
-    textCanvas.width = W;
-    textCanvas.height = H;
+// Настройка размеров
+function resize(){
+  W=innerWidth; H=innerHeight;
+  bgC.width=W; bgC.height=H;
+  txC.width=W; txC.height=H;
+  makeHearts();
+  makeTextParticles();
+}
+window.addEventListener('resize',resize);
+resize();
+
+// Создаем стеклянные сердечки
+class Heart {
+  constructor(){ this.reset(); }
+  reset(){
+    this.x=Math.random()*W; this.y=Math.random()*H;
+    this.size=8+Math.random()*7;
+    this.speedX=(Math.random()-0.5)*0.6+0.3;
+    this.speedY=(Math.random()-0.5)*0.6+0.3;
+    this.angle=Math.random()*2*Math.PI;
+    this.angleSpeed=(Math.random()-0.5)*0.02;
+    this.alpha=0.05+Math.random()*0.1;
+    this.vx=0; this.vy=0;
   }
-  window.addEventListener('resize', () => {
-    resize();
-    createTextParticles();
+  repel(px,py){
+    const dx=this.x-px, dy=this.y-py;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d<150){
+      const fn=(150-d)/150*5;
+      this.vx+=dx/d*fn; this.vy+=dy/d*fn;
+    }
+  }
+  update(){
+    this.vx*=0.9; this.vy*=0.9;
+    this.x+=this.speedX+this.vx;
+    this.y+=this.speedY+this.vy;
+    this.angle+=this.angleSpeed;
+    if(this.x<-20) this.x=W+20;
+    if(this.x>W+20) this.x=-20;
+    if(this.y<-20) this.y=H+20;
+    if(this.y>H+20) this.y=-20;
+  }
+  draw(ctx){
+    ctx.save();
+    ctx.translate(this.x,this.y);
+    ctx.rotate(this.angle);
+    const g=ctx.createRadialGradient(0,0,this.size*0.1,0,0,this.size);
+    g.addColorStop(0,`rgba(255,182,193,${this.alpha+0.2})`);
+    g.addColorStop(0.6,`rgba(255,182,193,${this.alpha})`);
+    g.addColorStop(1,'rgba(255,182,193,0)');
+    ctx.fillStyle=g;
+    ctx.beginPath();
+    ctx.moveTo(0,-this.size/2);
+    ctx.bezierCurveTo(this.size/2,-this.size,this.size,0,0,this.size);
+    ctx.bezierCurveTo(-this.size,0,-this.size/2,-this.size,0,-this.size/2);
+    ctx.fill();
+    ctx.strokeStyle=`rgba(255,182,193,${this.alpha*0.3})`;
+    ctx.lineWidth=0.7; ctx.shadowColor=`rgba(255,182,193,${this.alpha*0.7})`;
+    ctx.shadowBlur=6; ctx.stroke();
+    ctx.restore();
+  }
+}
+
+// Создаем партию сердечек
+function makeHearts(){
+  hearts=[];
+  for(let i=0;i<150;i++) hearts.push(new Heart());
+}
+
+// Создаем текстовые частицы
+const offC = document.createElement('canvas'), offCtx = offC.getContext('2d');
+function makeTextParticles(){
+  offC.width=W; offC.height=H;
+  offCtx.clearRect(0,0,W,H);
+  offCtx.font=`bold ${fontSize}px Arial`;
+  offCtx.textAlign='center'; offCtx.textBaseline='middle';
+  offCtx.fillStyle='white'; offCtx.fillText(text,W/2,H/2);
+  const D=offCtx.getImageData(0,0,W,H).data;
+  textParticles=[];
+  for(let y=0;y<H;y+=3)for(let x=0;x<W;x+=3){
+    if(D[(y*W+x)*4+3]>128){
+      textParticles.push({
+        baseX:x, baseY:y,
+        x:x+Math.random()-0.5,
+        y:y+Math.random()-0.5,
+        size:1.2,
+        flick:Math.random()*2000,
+        alpha:0.4+Math.random()*0.3,
+        phase:Math.random()*Math.PI*2
+      });
+    }
+  }
+}
+
+// Отрисовка светлячков текста
+function drawText(){
+  txCtx.clearRect(0,0,W,H);
+  const fSp=0.003, mSp=0.008;
+  textParticles.forEach(p=>{
+    const b=0.3+0.4*Math.sin(time*fSp + p.flick);
+    const wy=Math.sin(time*mSp + p.phase)*2;
+    p.x=p.baseX + Math.cos(time*mSp + p.phase)*0.5;
+    p.y=p.baseY + wy;
+    txCtx.fillStyle=`rgba(255,182,193,${b*p.alpha})`;
+    txCtx.beginPath();
+    txCtx.arc(p.x,p.y,p.size,0,2*Math.PI);
+    txCtx.fill();
   });
-  resize();
+}
 
-  class HeartParticle {
-    constructor() {
-      this.reset();
-    }
-    reset() {
-      this.x = Math.random() * W;
-      this.y = Math.random() * H;
-      this.size = 8 + Math.random() * 7;
-      this.speedX = (Math.random() - 0.5) * 0.6 + 0.3;
-      this.speedY = (Math.random() - 0.5) * 0.6 + 0.3;
-      this.angle = Math.random() * Math.PI * 2;
-      this.angleSpeed = (Math.random() - 0.5) * 0.02;
-      this.alpha = 0.05 + Math.random() * 0.1;
-      this.vx = 0; // velocity X для отталкивания
-      this.vy = 0; // velocity Y
-    }
-    draw(ctx) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle);
+// Анимация фона и всех
+bgC.addEventListener('click',e=>{
+  const rx=e.clientX, ry=entY;
+  hearts.forEach(h=>h.repel(rx,ry));
+});
 
-      const grad = ctx.createRadialGradient(0, 0, this.size * 0.1, 0, 0, this.size);
-      grad.addColorStop(0, `rgba(255, 182, 193, ${this.alpha + 0.2})`);
-      grad.addColorStop(0.6, `rgba(255, 182, 193, ${this.alpha})`);
-      grad.addColorStop(1, `rgba(255, 182, 193, 0)`);
-
-      ctx.fillStyle = grad;
-
-      ctx.beginPath();
-      ctx.moveTo(0, -this.size / 2);
-      ctx.bezierCurveTo(this.size / 2, -this.size, this.size, 0, 0, this.size);
-      ctx.bezierCurveTo(-this.size, 0, -this.size / 2, -this.size, 0, -this.size / 2);
-      ctx.fill();
-
-      ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.3})`;
-      ctx.lineWidth = 0.7;
-      ctx.shadowColor = `rgba(255,182,193,${this.alpha * 0.6})`;
-      ctx.shadowBlur = 8;
-      ctx.stroke();
-
-      ctx.restore();
-    }
-    update() {
-      // Плавное замедление скорости отталкивания (демпфинг)
-      this.vx *= 0.95;
-      this.vy *= 0.95;
-
-      // Добавляем к позиции текущую скорость
-      this.x += this.speedX + this.vx;
-      this.y += this.speedY + this.vy;
-      this.angle += this.angleSpeed;
-
-      // Зацикливание по краям
-      if (this.x < -20) this.x = W + 20;
-      if (this.x > W + 20) this.x = -20;
-      if (this.y < -20) this.y = H + 20;
-      if (this.y > H + 20) this.y = -20;
-    }
-    repelFrom(px, py) {
-      const dx = this.x - px;
-      const dy = this.y - py;
-      const distSq = dx * dx + dy * dy;
-      const dist = Math.sqrt(distSq);
-
-      if (dist < 150) { // радиус отталкивания
-        const force = (150 - dist) / 150 * 5; // сила отталкивания зависит от расстояния
-        // нормализуем вектор
-        const nx = dx / dist;
-        const ny = dy / dist;
-
-        this.vx += nx * force;
-        this.vy += ny * force;
-      }
-    }
-  }
-
-  const hearts = [];
-  const HEART_COUNT = 150;
-  for (let i = 0; i < HEART_COUNT; i++) {
-    hearts.push(new HeartParticle());
-  }
-
-  // Текстовые светлячки
-  const text = 'с тебя чипсеки';
-  let fontSize = 110;
-  const textParticles = [];
-  const textParticleSize = 1.5;
-
-  const offscreenCanvas = document.createElement('canvas');
-  const offscreenCtx = offscreenCanvas.getContext('2d');
-
-  function createTextParticles() {
-    offscreenCanvas.width = W;
-    offscreenCanvas.height = H;
-    offscreenCtx.clearRect (0, 0, W, H);
-    offscreenCtx.font = `bold ${fontSize}px Arial`;
-    offscreenCtx.textBaseline = 'middle';
-    offscreenCtx.textAlign = 'center';
-    offscreenCtx.fillStyle = 'white';
-    offscreenCtx.fillText(text, W / 2, H / 2);
-
-    const imageData = offscreenCtx.getImageData(0, 0, W, H);
-    textParticles.length = 0;
-
-    for (let y = 0; y < H; y += 3) {
-      for (let x = 0; x < W; x += 3) {
-        const idx = (y * W + x) * 4;
-        if (imageData.data[idx + 3] > 128) {
-          textParticles.push({
-            baseX: x,
-            baseY: y,
-            x: x + (Math.random() - 0.5) * 0.5,
-            y: y + (Math.random() - 0.5) * 0.5,
-            size: textParticleSize,
-            flickerOffset: Math.random() * 2000,
-            alpha: 0.4 + Math.random() * 0.3,
-            movePhase: Math.random() * Math.PI * 2,
-            wavePhase: Math.random() * Math.PI * 2,
-          });
-        }
-      }
-    }
-  }
-  createTextParticles();
-
-  function drawTextParticles(ctx, time) {
-    ctx.clearRect(0, 0, W, H);
-    const flickerSpeed = 0.003;
-    const moveAmplitude = 0.8;
-    const moveFrequency = 0.008;
-
-    textParticles.forEach(p => {
-      const brightness = 0.5 + 0.5 * Math.sin(time * flickerSpeed + p.flickerOffset);
-      const waveY = Math.sin(time * moveFrequency + p.wavePhase) * 2;
-
-      p.x = p.baseX + Math.sin(time * moveFrequency + p.movePhase) * moveAmplitude;
-      p.y = p.baseY + waveY;
-
-      ctx.fillStyle = `rgba(255,255,255,${brightness * p.alpha})`;
-
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.shadowColor = `rgba(255,182,193,${brightness * 0.3})`;
-      ctx.shadowBlur = 5;
-      ctx.fill();
-    });
-  }
-
-  let time = 0;
-
-  // Обработчик клика — отталкиваем сердечки от точки клика
-  bgCanvas.addEventListener('click', (e) => {
-    const rect = bgCanvas.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const clickY = e.clientY - rect.top;
-
-    hearts.forEach(h => h.repelFrom(clickX, clickY));
-  });
-
-  function animate() {
-    time++;
-
-    bgCtx.fillStyle = '#000';
-    bgCtx.fillRect(0, 0, W, H);
-
-    hearts.forEach(h => {
-      h.update();
-      h.draw(bgCtx);
-    });
-
-    drawTextParticles(textCtx, time);
-
-    requestAnimationFrame(animate);
-  }
-
-  animate();
+function loop(){
+  time++;
+  bgCtx.fillStyle='#000'; bgCtx.fillRect(0,0,W,H);
+  hearts.forEach(h=>{h.update();h.draw(bgCtx)});
+  drawText();
+  requestAnimationFrame(loop);
+}
+loop();
 </script>
 </body>
-</html>
+</html>.clie
