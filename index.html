@@ -63,7 +63,7 @@
         ctx.save();
         ctx.translate(this.x, this.y);
         ctx.rotate(this.angle);
-        ctx.fillStyle = rgba(255,105,180,${this.alpha});
+        ctx.fillStyle = `rgba(255,105,180,${this.alpha})`;
         ctx.beginPath();
         ctx.moveTo(0, -this.size/2);
         ctx.bezierCurveTo(this.size/2, -this.size, this.size, 0, 0, this.size);
