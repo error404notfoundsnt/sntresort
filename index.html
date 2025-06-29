@@ -44,6 +44,49 @@
       bgCanvas.height = H;
       textCanvas.width = W;
       textCanvas.height = H;
+offscreenCanvas.width = W;
+      offscreenCanvas.height = H;
+    }
+
+    const offscreenCanvas = document.createElement('canvas');
+    const offscreenCtx = offscreenCanvas.getContext('2d');
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    const text = 'с тебя чипсеки';
+    const fontSize = 80;
+    const textParticleSize = 2;
+    const textParticles = [];
+
+    function createTextParticles() {
+      offscreenCtx.clearRect(0, 0, W, H);
+      offscreenCtx.font = fontSize + 'px Arial';
+      offscreenCtx.fillStyle = 'white';
+      offscreenCtx.textAlign = 'center';
+      offscreenCtx.textBaseline = 'middle';
+      offscreenCtx.fillText(text, W / 2, H / 2);
+
+      const imageData = offscreenCtx.getImageData(0, 0, W, H);
+      textParticles.length = 0;
+      for (let y = 0; y < H; y += 6) {
+        for (let x = 0; x < W; x += 6) {
+          const index = (y * W + x) * 4;
+          if (imageData.data[index + 3] > 128) {
+            textParticles.push({
+              x: x,
+              y: y,
+              baseX: x,
+              baseY: y,
+              size: textParticleSize,
+              offset: Math.random() * 1000,
+              brightness: 1
+            });
+          }
+        }
+      }
+    }
+    createTextParticles();
     }
     resize();
     window.addEventListener('resize', resize);
