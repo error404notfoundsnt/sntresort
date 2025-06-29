@@ -2,212 +2,213 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8" />
-<title>ыыыыыы</title>
+<title>с тебя чипсеки</title>
 <style>
-  html, body {
-    margin: 0; padding: 0; overflow: hidden;
-    height: 100vh; width: 100vw;
-    font-family: Arial, sans-serif;
-    background: linear-gradient(135deg, #3b0a22, #5c1036, #6e1a40, #5c1036, #3b0a22);
-    background-size: 600% 600%;
-    animation: bgWineGlow 20s ease infinite;
-  }
-  @keyframes bgWineGlow {
-    0% {background-position: 0% 50%;}
-    50% {background-position: 100% 50%;}
-    100% {background-position: 0% 50%;}
-  }
-  #bottomText {
-    position: fixed;
-    right: 10px;
-    bottom: 5px;
-    font-size: 12px;
-    color: rgba(255,255,255,0.5);
-    user-select: none;
-    z-index: 10;
-  }
-  canvas {
-    display: block;
-    position: absolute;
-    top: 0; left: 0;
-  }
+html, body {
+margin: 0; padding: 0; overflow: hidden;
+height: 100vh; width: 100vw;
+font-family: Arial, sans-serif;
+background: linear-gradient(135deg, #3b0a22, #5c1036, #6e1a40, #5c1036, #3b0a22);
+background-size: 600% 600%;
+animation: bgWineGlow 20s ease infinite;
+}
+@keyframes bgWineGlow {
+0% {background-position: 0% 50%;}
+50% {background-position: 100% 50%;}
+100% {background-position: 0% 50%;}
+}
+#bottomText {
+position: fixed;
+right: 10px;
+bottom: 5px;
+font-size: 12px;
+color: rgba(255,255,255,0.5);
+user-select: none;
+z-index: 10;
+}
+canvas {
+display: block;
+position: absolute;
+top: 0; left: 0;
+}
 </style>
 </head>
 <body>
 <canvas id="background"></canvas>
 <canvas id="textCanvas"></canvas>
-<div id="bottomText">Иисус не поможет,чипсе на базу</div>
+<div id="bottomText">Иисус тут не поможет</div>
 
 <script>
-  const bgCanvas = document.getElementById('background');
-  const bgCtx = bgCanvas.getContext('2d');
-  const textCanvas = document.getElementById('textCanvas');
-  const textCtx = textCanvas.getContext('2d');
+const bgCanvas = document.getElementById('background');
+const bgCtx = bgCanvas.getContext('2d');
+const textCanvas = document.getElementById('textCanvas');
+const textCtx = textCanvas.getContext('2d');
 
-  let W, H;
-  function resize() {
-    W = window.innerWidth;
-    H = window.innerHeight;
-    bgCanvas.width = W;
-    bgCanvas.height = H;
-    textCanvas.width = W;
-    textCanvas.height = H;
-  }
-  window.addEventListener('resize', resize);
-  resize();
+let W, H;
+function resize() {
+W = window.innerWidth;
+H = window.innerHeight;
+bgCanvas.width = W;
+bgCanvas.height = H;
+textCanvas.width = W;
+textCanvas.height = H;
+}
+window.addEventListener('resize', resize);
+resize();
 
-  // Класс сердечка — стеклянное, полупрозрачное с подсветкой
-  class HeartParticle {
-    constructor() {
-      this.reset();
-    }
-    reset() {
-      this.x = Math.random() * W;
-      this.y = Math.random() * H;
-      this.size = 5 + Math.random() * 30;
-      this.speedX = (Math.random() - 0.9) * 0.20;
-      this.speedY = (Math.random() - 0.9) * 0.20;
-      this.angle = Math.random() * Math.PI * 2.5;
-      this.angleSpeed = (Math.random() - 0.5) * 0.4;
-      this.alpha = 0.15 + Math.random() * 0.5;
-    }
-    draw(ctx) {
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(this.angle);
-      // стеклянный эффект с градиентом
-      const grad = ctx.createRadialGradient(0, 0, this.size * 0.4, 0, 0, this.size);
-      grad.addColorStop(0, `rgba(255, 105, 180, ${this.alpha + 0.8})`);
-      grad.addColorStop(0.5, `rgba(255, 182, 193, ${this.alpha})`);
-      grad.addColorStop(1, `rgba(255, 105, 180, 0)`);
-      ctx.fillStyle = grad;
+// Класс сердечка — стеклянное, полупрозрачное с подсветкой
+class HeartParticle {
+constructor() {
+this.reset();
+}
+reset() {
+this.x = Math.random() * W;
+this.y = Math.random() * H;
+this.size = 10 + Math.random() * 10;
+this.speedX = (Math.random() - 0.5) * 0.15;
+this.speedY = (Math.random() - 0.5) * 0.15;
+this.angle = Math.random() * Math.PI * 2;
+this.angleSpeed = (Math.random() - 0.5) * 0.005;
+this.alpha = 0.15 + Math.random() * 0.3;
+}
+draw(ctx) {
+ctx.save();
+ctx.translate(this.x, this.y);
+ctx.rotate(this.angle);
+// стеклянный эффект с градиентом
+const grad = ctx.createRadialGradient(0, 0, this.size * 0.1, 0, 0, this.size);
+grad.addColorStop(0, `rgba(255, 105, 180, ${this.alpha + 0.3})`);
+grad.addColorStop(0.5, `rgba(255, 182, 193, ${this.alpha})`);
+grad.addColorStop(1, `rgba(255, 105, 180, 0)`);
+ctx.fillStyle = grad;
 
-      ctx.beginPath();
-      ctx.moveTo(0, -this.size / 1);
-      ctx.bezierCurveTo(this.size / 1, -this.size, this.size, 0, 0, this.size);
-      ctx.bezierCurveTo(-this.size, 0, -this.size / 1, -this.size, 0, -this.size / 1);
-      ctx.fill();
+ctx.beginPath();
+ctx.moveTo(0, -this.size / 2);
+ctx.bezierCurveTo(this.size / 2, -this.size, this.size, 0, 0, this.size);
+ctx.bezierCurveTo(-this.size, 0, -this.size / 2, -this.size, 0, -this.size / 2);
+ctx.fill();
 
-      // легкий светящийся контур — подсветка
-      ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.01})`;
-      ctx.lineWidth = 0.5;
-      ctx.stroke();
-      ctx.restore();
-    }
-    update() {
-      this.x += this.speedX;
-      this.y += this.speedY;
-      this.angle += this.angleSpeed;
-      if (this.x < -20) this.x = W + 20;
-      if (this.x > W + 20) this.x = -20;
-      if (this.y < -20) this.y = H + 20;
-      if (this.y > H + 20) this.y = -20;
-    }
-  }
+// легкий светящийся контур — подсветка
+ctx.strokeStyle = `rgba(255, 182, 193, ${this.alpha * 0.7})`;
+ctx.lineWidth = 1;
+ctx.stroke();
+ctx.restore();
+}
+update() {
+this.x += this.speedX;
+this.y += this.speedY;
+this.angle += this.angleSpeed;
+if (this.x < -20) this.x = W + 20;
+if (this.x > W + 20) this.x = -20;
+if (this.y < -20) this.y = H + 20;
+if (this.y > H + 20) this.y = -20;
+}
+}
 
-  // Генерация и отрисовка сердечек
-  const hearts = [];
+// Генерация и отрисовка сердечек
+const hearts = [];
 const HEART_COUNT = 120;
 for (let i = 0; i < HEART_COUNT; i++) {
 hearts.push(new HeartParticle());
 }
 
-  // Частицы текста — светлячки
- const text = 'с тебя чипсеки';
+// Частицы текста — светлячки
+const text = 'с тебя чипсеки';
 let fontSize = 110;
 const textParticles = [];
 const textParticleSize = 3;
 let time = 0;
 
-  // Создаём скрытый canvas для захвата пикселей текста
-  const offscreenCanvas = document.createElement('canvas');
-  const offscreenCtx = offscreenCanvas.getContext('2d');
+// Создаём скрытый canvas для захвата пикселей текста
+const offscreenCanvas = document.createElement('canvas');
+const offscreenCtx = offscreenCanvas.getContext('2d');
 
-  function createTextParticles() {
-    offscreenCanvas.width = W;
-    offscreenCanvas.height = H;
-    offscreenCtx.clearRect(0, 0, W, H);
-    offscreenCtx.font = `bold ${fontSize}px Arial`;
-    offscreenCtx.textBaseline = 'middle';
-    offscreenCtx.textAlign = 'center';
-    offscreenCtx.fillStyle = 'white';
-    offscreenCtx.fillText(text, W / 2, H / 2);
+function createTextParticles() {
+offscreenCanvas.width = W;
+offscreenCanvas.height = H;
+offscreenCtx.clearRect(0, 0, W, H);
+offscreenCtx.font = `bold ${fontSize}px Arial`;
+offscreenCtx.textBaseline = 'middle';
+offscreenCtx.textAlign = 'center';
+offscreenCtx.fillStyle = 'white';
+offscreenCtx.fillText(text, W / 2, H / 2);
 
-    const imageData = offscreenCtx.getImageData(0, 0, W, H);
-    textParticles.length = 0;
-    for (let y = 0; y < H; y += 6) {
-      for (let x
-
-
+const imageData = offscreenCtx.getImageData(0, 0, W, H);
+textParticles.length = 0;
+for (let y = 0; y < H; y += 6) {
+for (let x
+Выбрать сообщение
+Sofa
+16:26
 = 0; x < W; x += 6) {
-        const idx = (y * W + x) * 4;
-        if (imageData.data[idx + 3] > 128) {
-          textParticles.push({
-            baseX: x,
-            baseY: y,
-            x: x + (Math.random() - 0.5) * 3,
-            y: y + (Math.random() - 0.5) * 3,
-            size: textParticleSize,
-            flickerOffset: Math.random() * 1000,
-            alpha: 0.7 + Math.random() * 0.3,
-          });
-        }
-      }
-    }
-  }
-  createTextParticles();
+const idx = (y * W + x) * 4;
+if (imageData.data[idx + 3] > 128) {
+textParticles.push({
+baseX: x,
+baseY: y,
+x: x + (Math.random() - 0.5) * 3,
+y: y + (Math.random() - 0.5) * 3,
+size: textParticleSize,
+flickerOffset: Math.random() * 1000,
+alpha: 0.7 + Math.random() * 0.3,
+});
+}
+}
+}
+}
+createTextParticles();
 
-  function drawTextParticles(ctx) {
-    ctx.clearRect(0, 0, W, H);
+function drawTextParticles(ctx) {
+ctx.clearRect(0, 0, W, H);
 
-    // Плавание текста на волнах (чуть-чуть)
-    const waveAmplitude = 4;
-    const waveFrequency = 0.007;
+// Плавание текста на волнах (чуть-чуть)
+const waveAmplitude = 3;
+const waveFrequency = 0.002;
 
-    textParticles.forEach(p => {
-      // Плавное смещение по Y для эффекта волн
-      const wave = waveAmplitude * Math.sin(waveFrequency * p.baseX + time * 0.02);
-      p.x = p.baseX + (Math.random() - 0.5) * 0.5; // чуть шевеление X
-      p.y = p.baseY + wave + (Math.random() - 0.5) * 0.5; // волны + микродвижение Y
+textParticles.forEach(p => {
+// Плавное смещение по Y для эффекта волн
+const wave = waveAmplitude * Math.sin(waveFrequency * p.baseX + time * 0.02);
+p.x = p.baseX + (Math.random() - 0.5) * 0.5; // чуть шевеление X
+p.y = p.baseY + wave + (Math.random() - 0.5) * 0.5; // волны + микродвижение Y
 
-      // Яркость как светлячок (мерцание)
-      const brightness = 0.5 + 0.5 * Math.sin(time * 0.1 + p.flickerOffset);
-      ctx.fillStyle = `rgba(255,255,255,${brightness})`;
+// Яркость как светлячок (мерцание)
+const brightness = 0.5 + 0.5 * Math.sin(time * 0.1 + p.flickerOffset);
+ctx.fillStyle = `rgba(255,255,255,${brightness})`;
 
-      // Рисуем частичку (круг)
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 1);
-      ctx.fill();
+// Рисуем частичку (круг)
+ctx.beginPath();
+ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+ctx.fill();
 
-      // След
-      ctx.shadowColor = `rgba(255,182,193,${brightness * 0.3})`;
-      ctx.shadowBlur = 5;
-      ctx.fill();
-    });
-  }
+// След
+ctx.shadowColor = `rgba(255,182,193,${brightness * 0.6})`;
+ctx.shadowBlur = 10;
+ctx.fill();
+});
+}
 
-  function animate() {
-    time++;
+function animate() {
+time++;
 
-    // Очистка фона с легким размытием для следов
-    bgCtx.fillStyle = 'rgba(50,7,25,0.7)';
-    bgCtx.fillRect(0, 0, W, H);
+// Очистка фона с легким размытием для следов
+bgCtx.fillStyle = 'rgba(59,10,34,0.15)';
+bgCtx.fillRect(0, 0, W, H);
 
-    hearts.forEach(h => {
-      h.update();
-      h.draw(bgCtx);
-    });
+hearts.forEach(h => {
+h.update();
+h.draw(bgCtx);
+});
 
-    drawTextParticles(textCtx);
+drawTextParticles(textCtx);
 
-    requestAnimationFrame(animate);
-  }
+requestAnimationFrame(animate);
+}
 
-  animate();
-  window.addEventListener('resize', () => {
-    resize();
-    createTextParticles();
-  });
+animate();
+window.addEventListener('resize', () => {
+resize();
+createTextParticles();
+});
 </script>
 </body>
 </html>
