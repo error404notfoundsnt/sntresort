@@ -1,109 +1,163 @@
+Софа, [29.06.2025 14:28]
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>с тебя чипсеки</title>
-  <style>
-    body {
-      margin: 0;
-      background: #000;
-      overflow: hidden;
-      font-family: 'Arial', sans-serif;
-      color: pink;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      user-select: none;
-      position: relative;
-    }
-
-    #message {
-      font-size: 4rem;
-      font-weight: bold;
-      text-shadow: 0 0 8px pink;
-      position: relative;
-      z-index: 10;
-      animation: float 3s ease-in-out infinite;
-    }
-
-    @keyframes float {
-      0%, 100% {
-        transform: translateY(0);
-      }
-      50% {
-        transform: translateY(-20px);
-      }
-    }
-
-    /* Анимация сердечек */
-    .heart {
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: pink;
-      transform: rotate(-45deg);
-      top: 50%;
-      left: 50%;
-      animation-name: rise;
-      animation-timing-function: linear;
-      animation-iteration-count: infinite;
-      opacity: 0.8;
-      filter: drop-shadow(0 0 2px deeppink);
-    }
-
-    .heart:before,
-    .heart:after {
-      content: "";
-      position: absolute;
-      width: 20px;
-      height: 20px;
-      background: pink;
-      border-radius: 50%;
-    }
-
-    .heart:before {
-      top: -10px;
-      left: 0;
-    }
-
-    .heart:after {
-      top: 0;
-      left: 10px;
-    }
-
-    @keyframes rise {
-      0% {
-        transform: translate(var(--x), 0) rotate(-45deg);
-        opacity: 0.8;
-      }
-      100% {
-        transform: translate(calc(var(--x) + 0px), -150vh) rotate(-45deg);
-        opacity: 0;
-      }
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>с тебя чипсеки</title>
+<style>
+  body, html {
+    margin:0; padding:0; overflow:hidden; background:#000; height:100vh; width:100vw;
+    font-family: Arial, sans-serif;
+  }
+  canvas {
+    position: fixed; top:0; left:0; display:block;
+  }
+  #footerText {
+    position: fixed;
+    bottom: 5px; right: 10px;
+    font-size: 10px; color: #aaa;
+    user-select:none;
+    pointer-events:none;
+    font-family: monospace;
+  }
+</style>
 </head>
 <body>
 
-  <div id="message">с тебя чипсеки</div>
+<canvas id="canvas"></canvas>
+<div id="footerText">Иисус тут не поможет</div>
 
-  <script>
-    // Генерим сердечки и запускаем анимацию
-    const heartsCount = 30;
-    for (let i = 0; i < heartsCount; i++) {
-      const heart = document.createElement('div');
-      heart.classList.add('heart');
-      // случайная позиция по горизонтали в vw
-      const x = (Math.random() * 100) + 'vw';
-      heart.style.setProperty('--x', x);
-      heart.style.left = x;
-      // случайное время анимации
-      heart.style.animationDuration = (5 + Math.random() * 5) + 's';
-      heart.style.animationDelay = (Math.random() * 5) + 's';
-      document.body.appendChild(heart);
+<script>
+(() => {
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  let W, H;
+
+  function resize() {
+    W = window.innerWidth;
+    H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  class HeartParticle {
+    constructor() {
+      this.size = 5 + Math.random() * 4;
+      this.x = Math.random() * W;
+      this.y = Math.random() * H;
+      this.baseX = this.x;
+      this.baseY = this.y;
+      this.angle = Math.random() * Math.PI * 2;
+      this.radius = 2 + Math.random() * 3;
+      this.speed = 0.002 + Math.random() * 0.003;
+      this.t = Math.random() * 1000;
+      this.color = rgba(255, 105, 180, ${0.3 + Math.random() * 0.3}); // нежно-розовый
     }
-  </script>
+    update() {
+      this.t += this.speed * 50;
+      this.x = this.baseX + Math.sin(this.t) * this.radius;
+      this.y = this.baseY + Math.cos(this.t) * this.radius;
+    }
+    draw() {
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.fillStyle = this.color;
+      ctx.beginPath();
+      // Два круга сверху
+      let s = this.size;
+      ctx.arc(-s / 4, 0, s / 4, 0, Math.PI * 2);
+      ctx.arc(s / 4, 0, s / 4, 0, Math.PI * 2);
+      // Треугольник вниз
+      ctx.moveTo(-s / 2, 0);
+      ctx.lineTo(0, s);
+      ctx.lineTo(s / 2, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+
+  class TextParticle {
+    constructor(x, y) {
+      this.baseX = x;
+      this.baseY = y;
+      this.x = x + (Math.random() - 0.5) * 2;
+      this.y = y + (Math.random() - 0.5) * 2;
+      this.size = 2 + Math.random() * 1.5;
+      this.color = 'rgba(0,255,255,0.9)';
+      this.speedX = (Math.random() - 0.5) * 0.15;
+      this.speedY = (Math.random() - 0.5) * 0.15;
+    }
+    update() {
+      this.x += this.speedX;
+      this.y += this.speedY;
+      this.speedX += (this.baseX - this.x) * 0.05;
+      this.speedY += (this.baseY - this.y) * 0.05;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.fillStyle = this.color;
+      ctx.shadowColor = '#0ff';
+      ctx.shadowBlur = 8;
+      ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+  }
+
+  const text = 'с тебя чипсеки';
+  const fontSize = 100;
+  const offscreenCanvas = document.createElement('canvas');
+  const offCtx = offscreenCanvas.getContext('2d');
+  offscreenCanvas.width = 800;
+  offscreenCanvas.height = 200;
+  offCtx.font = ${fontSize}px Arial;
+  offCtx.fillStyle = 'white';
+  offCtx.textBaseline = 'middle';
+  offCtx.fillText(text, 10, offscreenCanvas.height / 2);
+
+  const imageData = offCtx.getImageData(0, 0, offscreenCanvas.width, offscreenCanvas.height);
+  const textParticles = [];
+
+  for(let y = 0; y < offscreenCanvas.height; y += 3){
+    for(let x = 0; x < offscreenCanvas.width; x += 3){
+      const idx = (y * offscreenCanvas.width + x) * 4;
+      const alpha = imageData.data[idx + 3];
+      if(alpha > 128){
+        let posX = x + (W/2 - offscreenCanvas.width/2);
+        let posY = y + (H/2 - offscreenCanvas.height/2);
+        textParticles.push(new TextParticle(posX, posY));
+      }
+    }
+  }
+
+  const hearts = [];
+  for(let i=0; i<100; i++){
+    hearts.push(new HeartParticle());
+  }
+
+  function animate(){
+    ctx.clearRect(0, 0, W, H);
+    hearts.forEach(h => {
+      h.update();
+      h.draw();
+    });
+    textParticles.forEach(p => {
+      p.update();
+      p.draw();
+    });
+
+Софа, [29.06.2025 14:28]
+requestAnimationFrame(animate);
+  }
+
+  animate();
+
+})();
+</script>
 
 </body>
 </html>
