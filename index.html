@@ -36,7 +36,7 @@
 <body>
 <canvas id="background"></canvas>
 <canvas id="textCanvas"></canvas>
-<div id="bottomText">Иисус тут не поможет</div>
+<div id="bottomText">Иисус не поможет,чипсе на базу</div>
 
 <script>
   const bgCanvas = document.getElementById('background');
@@ -64,11 +64,11 @@
     reset() {
       this.x = Math.random() * W;
       this.y = Math.random() * H;
-      this.size = 10 + Math.random() * 30;
-      this.speedX = (Math.random() - 0.5) * 0.17;
-      this.speedY = (Math.random() - 0.5) * 0.20;
+      this.size = 5 + Math.random() * 30;
+      this.speedX = (Math.random() - 0.9) * 0.20;
+      this.speedY = (Math.random() - 0.9) * 0.20;
       this.angle = Math.random() * Math.PI * 2.5;
-      this.angleSpeed = (Math.random() - 0.5) * 0.01;
+      this.angleSpeed = (Math.random() - 0.5) * 0.4;
       this.alpha = 0.15 + Math.random() * 0.5;
     }
     draw(ctx) {
@@ -83,7 +83,7 @@
       ctx.fillStyle = grad;
 
       ctx.beginPath();
-      ctx.moveTo(0, -this.size / 4);
+      ctx.moveTo(0, -this.size / 1);
       ctx.bezierCurveTo(this.size / 1, -this.size, this.size, 0, 0, this.size);
       ctx.bezierCurveTo(-this.size, 0, -this.size / 1, -this.size, 0, -this.size / 1);
       ctx.fill();
@@ -113,11 +113,11 @@
   }
 
   // Частицы текста — светлячки
-  const text = 'с тебя чипсеки';
-  let fontSize = 120;
-  const textParticles = [];
-  const textParticleSize = 4;
-  let time = 0;
+ const text = 'с тебя чипсеки';
+let fontSize = 110;
+const textParticles = [];
+const textParticleSize = 3;
+let time = 0;
 
   // Создаём скрытый canvas для захвата пикселей текста
   const offscreenCanvas = document.createElement('canvas');
